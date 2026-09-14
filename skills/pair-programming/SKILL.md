@@ -7,6 +7,8 @@ description: Use when the user asks to "pair", "pair mode", "pair program", "wal
 
 **Recovery rule — read this first.** If `.pair/session.md` exists in the repository root, a pair session is in progress. Read it before doing anything else, make sure this skill is loaded in full (re-load it if you are working from a summary), and continue from its "Current step" and "phase". Never propose, write, or stage anything in this session without having read it this turn. If it does not exist, follow "Session start" below.
 
+**Every pause is a question-tool call.** Whenever this skill says ASK, call the harness's question tool (`question` in OpenCode, `AskUserQuestion` in Claude Code, `request_user_input` in Codex) with the fixed options below — never end your turn with a prose question when the tool exists. A chat question is the fallback only when no question tool is available in the current mode.
+
 You are building this *with* the human, not for them. Two goals carry equal weight: code that is correct, and a human who understands every line that lands — well enough to change it tomorrow without you. Speed is not a goal. Nothing is written until the human has approved the step; nothing is staged until they have seen and understood the result.
 
 ## Session start
@@ -35,7 +37,7 @@ Comfort 2 for an involved technology pushes toward `critical`; batch only pure b
            up to 3 genuinely different alternatives with one-line trade-offs, when they matter ·
            a sketch (≤ 10 lines) only if a technology involved is at comfort ≤ 2.
            A boilerplate batch: two lines.
-2 ASK      question tool (options below). Wait. Do not write anything yet.
+2 ASK      question TOOL call (options below) — not a chat message. Wait. Do not write anything yet.
 3 WRITE    only what was approved. Run the relevant checks (typecheck / lint / tests) and keep the
            results. Then take the checkpoint: `git stash create` → record the printed sha (empty
            output = clean tree → record HEAD), and for every untracked file (`git ls-files --others
@@ -47,7 +49,7 @@ Comfort 2 for an involved technology pushes toward `critical`; batch only pure b
            that tests understanding of actual behavior (e.g. "what does this return when the list
            is empty and `strict` is on?") — a colleague's question, not a quiz ·
            if something visible changed: where to look in the running app.
-5 ASK      question tool again. End the prompt text with "Save your editor buffers before answering."
+5 ASK      question TOOL call again. End the prompt text with "Save your editor buffers before answering."
            The human is reading the unstaged diff in their editor and may edit it.
 6 RESUME   run `git diff <checkpoint sha>`; re-hash every untracked file and compare with the recorded
            `path hash` list (new path = created; missing = deleted; different hash = edited —
@@ -65,7 +67,7 @@ Comfort 2 for an involved technology pushes toward `critical`; batch only pure b
 ```
 
 ### The question tool
-Use the harness's question tool at every ASK (OpenCode `question`, Claude Code `AskUserQuestion`, Codex `request_user_input`; if it is unavailable, end your turn with the same options numbered and resume when the human replies). Options, always in this order, plus the free-text answer the tool provides:
+Every ASK — the comfort profile, the step list, classification, each PROPOSE, each REPORT, every follow-up — is a call to the harness's question tool: OpenCode `question`, Claude Code `AskUserQuestion`, Codex `request_user_input`. If you are unsure whether one exists, check your tool list before asking anything in prose. The tool blocks until the human answers, presents the options as clickable choices, and keeps the answer structured; a question typed into chat does none of that and lets the loop drift. Only if no such tool is available (for example Codex code mode without `default_mode_request_user_input`) end your turn with the same options numbered and resume when the human replies. Put every decision-relevant fact inside the question and option descriptions — some tools hide the surrounding message while the prompt is open. Options, always in this order, plus the free-text answer the tool provides:
 
 | Option | At PROPOSE (2) | At REPORT (5) |
 |---|---|---|
@@ -98,6 +100,7 @@ When alternatives matter, number them so the human can answer with a digit. Shor
 
 ## Hard rules
 - Never write code before the step is approved. Never batch a `critical` step with anything.
+- Never pause with a prose question when a question tool is available; every ASK is a tool call.
 - Never commit or push. `git add <paths>` is the only index operation; never `-A`, `-u`, or `-N` (intent-to-add breaks `git stash create`).
 - Never dispatch implementer subagents; the human is your pair.
 - Never flatter. When an answer or an edit is wrong, say so and explain why.
