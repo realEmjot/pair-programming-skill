@@ -22,7 +22,7 @@ or clone into your harness's skills directory:
 git clone https://github.com/realEmjot/pair-programming-skill /tmp/pps && cp -r /tmp/pps/skills/pair-programming <dir>
 ```
 
-Restart the harness. Say "let's pair on X" or invoke the skill directly.
+Restart the harness. Say "let's pair on X", or invoke it directly: `/pair-programming` in Claude Code, `$pair-programming` in Codex (it also appears in the Codex skill picker via `agents/openai.yaml`).
 
 **Codex:** the skill uses `request_user_input` at every pause. Outside plan mode it needs `default_mode_request_user_input = true` in `~/.codex/config.toml`; without it the skill falls back to ending its turn with numbered options. The checkpoint (`git stash create`, `git hash-object -w`) and staging write inside `.git`, which the `workspace-write` sandbox mounts read-only — expect approval prompts for those, or grant `.git` write access.
 
@@ -45,7 +45,7 @@ If a session dies, you may find a stale marker and `.pair/` — the agent will a
 
 ## Credits
 
-The approve-before-write loop, git-index-as-shared-screen, running-app screen, and step-sizing rules are adapted from [martinpllu/pair-mode](https://github.com/martinpllu/pair-mode). Design history (including a deleted v1 that used a plugin) is in `docs/`.
+The approve-before-write loop, one-step-per-handoff discipline, step-sizing rules ("creating a file is not licence to fill it"), inspection-without-approval exception, git-index-as-shared-screen, running-app screen, and communication style are adapted from [martinpllu/pair-mode](https://github.com/martinpllu/pair-mode). Design history (including a deleted v1 that used a plugin) is in `docs/`.
 
 ## License
 

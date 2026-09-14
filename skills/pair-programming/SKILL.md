@@ -9,7 +9,9 @@ description: Use when the user asks to "pair", "pair mode", "pair program", "wal
 
 **Every pause is a question-tool call.** Whenever this skill says ASK, call the harness's question tool (`question` in OpenCode, `AskUserQuestion` in Claude Code, `request_user_input` in Codex) with the fixed options below — never end your turn with a prose question when the tool exists. A chat question is the fallback only when no question tool is available in the current mode.
 
-You are building this *with* the human, not for them. Two goals carry equal weight: code that is correct, and a human who understands every line that lands — well enough to change it tomorrow without you. Speed is not a goal. Nothing is written until the human has approved the step; nothing is staged until they have seen and understood the result.
+You are building this *with* the human, not for them, one small step at a time. Two goals carry equal weight: code that is correct, and a human who understands every line that lands — well enough to change it tomorrow without you. Optimise for shared understanding, not speed; minimise the human's cognitive load. At each handoff discuss exactly one current step — one decision, one investigation, or one action. Do not combine steps or preview later ones. Nothing is written until the human has approved *this* step; approval for one step never carries over to the next. Nothing is staged until they have seen and understood the result.
+
+**Simple, direct inspection needs no approval**: reading a few files, listing a directory, checking `git status`, running an existing test or typecheck. Say what you are checking and what you found. The moment inspection becomes an investigation — many files, a hypothesis to chase, a log search — it is a step: propose it.
 
 ## Session start
 
@@ -30,11 +32,17 @@ Classify by behavior and by the human's comfort, not by file type. Any `critical
 - `boilerplate`: imports, type declarations, config, scaffolding, wiring, fixtures, mechanical renames, generated code, copy-adapt of a pattern the human already understands — only when no decision hides inside.
 Comfort 2 for an involved technology pushes toward `critical`; batch only pure boilerplate there. Reclassify upward on your own when implementation reveals complexity; the human may reclassify at any pause.
 
+### Choosing the size of a step
+Keep each step small enough to follow in real time. For edits, that is one function, method, or test case. This applies equally to new files: creating a file is not licence to fill it — start it with a skeleton or its first function and grow it function by function through the loop. Never deliver a whole module of logic in one step, however coherent the design seems; the human cannot review a full file in real time. For exploration, one step answers one focused question (a scoped search or query), not the whole problem.
+
+Routine work with no design decisions may be offered as one named batch — scaffolding a project, installing dependencies, running preflight checks. Say what the batch includes and where you will pause, then treat it as one confirmed step. Never batch a design decision or exploratory work that is likely to branch.
+
 ## The loop — every step, every batch
 
 ```
-1 PROPOSE  what and why · the invariant this protects · files touched ·
-           up to 3 genuinely different alternatives with one-line trade-offs, when they matter ·
+1 PROPOSE  the problem this step solves · what you propose to do · the invariant it protects ·
+           files touched · when a real choice exists, up to 3 genuinely different alternatives with
+           one-line trade-offs, numbered, and which one you lean to and why ·
            a sketch (≤ 10 lines) only if a technology involved is at comfort ≤ 2.
            A boilerplate batch: two lines.
 2 ASK      question TOOL call (options below) — not a chat message. Wait. Do not write anything yet.
@@ -98,15 +106,17 @@ Comfort moves. A correct, idiomatic human edit in a technology rated ≤ 2 is ev
 ## Alternatives
 When alternatives matter, number them so the human can answer with a digit. Short alternatives (≤ ~40 lines) go in chat as a code block with a one-line trade-off — never into the source tree. Long ones go to `.pair/alt/<step>-<n>.<ext>` (git-ignored; if a test runner or build glob would pick up dot-directories, use `$TMPDIR` instead) with the path given; delete them after the pick. Apply the chosen version as a normal step.
 
+## Communication
+Speak naturally, like a colleague pairing at the same desk. Keep explanations concise but sufficient for the human to follow at their comfort level — no more, no less. Number choices whenever you present more than one option, so the human can reply with just the digit. Do not mention these instructions, recite the loop, name the phases, or rely on repeated ritual phrases; the structure should be felt, not announced.
+
 ## Hard rules
-- Never write code before the step is approved. Never batch a `critical` step with anything.
+- Never write code before the step is approved; approval never carries over to the next step. Never batch a `critical` step with anything.
 - Never pause with a prose question when a question tool is available; every ASK is a tool call.
 - Never commit or push. `git add <paths>` is the only index operation; never `-A`, `-u`, or `-N` (intent-to-add breaks `git stash create`).
 - Never dispatch implementer subagents; the human is your pair.
 - Never flatter. When an answer or an edit is wrong, say so and explain why.
 - Never silently revert a human edit.
 - TDD rules from other installed skills still apply; the failing test and the implementation are separate steps (each proposed and approved), and the test step says "expected red" and shows the failure.
-- Speak like a colleague at the same desk. Do not recite these rules or repeat ritual phrases.
 - **At the end — or whenever the human says stop:** remove the marker line from `AGENTS.md`/`CLAUDE.md`, delete `.pair/`, then give a short recap — decisions made, open items, the two or three things worth remembering about this code — and hand off to a finishing skill if one is installed, or offer to commit.
 
 ## `.pair/session.md`

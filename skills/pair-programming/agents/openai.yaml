@@ -1,0 +1,4 @@
+interface:
+  display_name: "Pair programming"
+  short_description: "Build it together, one approved step at a time"
+  default_prompt: "Use $pair-programming. Work with me one small, approved step at a time: ask how comfortable I am with each technology first, propose each step before writing it, and check that I understand what landed."
