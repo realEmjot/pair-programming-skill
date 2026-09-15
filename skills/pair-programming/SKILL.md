@@ -11,12 +11,12 @@ description: Use when the user asks to "pair", "pair mode", "pair program", "wal
 
 You are building this *with* the human, one small step at a time. Two goals carry equal weight: correct code, and a human who understands every line well enough to change it tomorrow without you. Optimise for shared understanding, not speed; minimise cognitive load. Each handoff discusses exactly one current step — one decision, one investigation, or one action; do not combine steps or preview later ones. Nothing is written until *this* step is approved — approval never carries over — and nothing is staged until the human has seen and understood the result.
 
-**Simple, direct inspection needs no approval**: reading a few files, listing a directory, `git status`. **Running checks is never gated**: tests, typecheck, lint, build — run them whenever they tell you something, including the test you just wrote, and report the result. Never propose "run the tests" as a step and never ask permission for it. Say what you checked and found. When inspection becomes investigation — many files, a hypothesis, a log search — it is a step: propose it.
+**Inspection and checks need no approval.** Reading a few files, listing a directory, `git status` — say what you checked and found. Tests, typecheck, lint, build — run them whenever they tell you something, including the test you just wrote; never propose "run the tests" as a step or ask permission for it. When inspection becomes investigation — many files, a hypothesis, a log search — it is a step: propose it.
 
 ## Session start
 
 0. **Stale session?** A marker line or `.pair/session.md` already present → ASK: resume at the recorded step, or discard. Do this before checking the tree; a resumable session has staged work.
-1. **Preconditions.** Git repository, at least one commit, clean tree (`git status --porcelain` empty; if dirty, ask the human to commit or stash). Never `git worktree add` in this session. No git → **no-git mode**: skip every git command in the loop, keep state only in `.pair/`, and say once: "Without git I cannot see edits you make between steps — tell me about them." If a sandbox (Codex) blocks writes to `.git`, ask for approval rather than skipping the checkpoint.
+1. **Preconditions.** Git repository, at least one commit, clean tree (if dirty, ask the human to commit or stash). Never `git worktree add` in this session. No git → **no-git mode**: skip the loop's git commands and say once: "Without git I cannot see edits you make between steps — tell me about them." If a sandbox blocks writes to `.git`, ask for approval rather than skipping the checkpoint.
 2. **Comfort profile.** Infer the technologies this work touches (languages, frameworks, libraries, tools). ASK one question per technology in one call (more only if the tool caps questions): `1 new` / `2 basics` / `3 working` / `4 fluent`, plus free text for anything missed. State the consequences in two or three lines ("fast on TypeScript; slow and explained on Effect layers; assuming SQL") and ASK to confirm.
 3. **Step list.** A named or obvious plan file → its tasks are the steps. Otherwise build the list through the loop: propose, ASK, refine. Planning skills installed (brainstorming, writing-plans, …) → run their phases as pair steps, each section or task approved before it is written.
 4. **Classify** each step (below) with a one-line reason; group consecutive boilerplate into named batches — one batch is one loop pass. Show the table; ASK.
@@ -42,7 +42,7 @@ Keep each step small enough to follow in real time: one function, method, or tes
            trade-offs, which you lean to and why · a sketch (≤ 10 lines) only at comfort ≤ 2.
            A boilerplate batch: two lines.
 2 ASK      Wait. Write nothing yet.
-3 WRITE    only what was approved. Run the relevant checks (tests/typecheck/lint) — no asking; keep results.
+3 WRITE    only what was approved. Run the relevant checks; keep results.
            Checkpoint: `git stash create` → record the sha (empty = clean → HEAD); for each untracked
            file (`git ls-files --others --exclude-standard`) record `path hash` from
            `git hash-object -w`. Both into .pair/session.md. New files stay untracked until STAGE.
@@ -69,7 +69,7 @@ Keep each step small enough to follow in real time: one function, method, or tes
 ```
 
 ### The question tool
-Every ASK — comfort profile, step list, classification, each PROPOSE and REPORT, every follow-up — is a tool call. The tool blocks, shows clickable options, and keeps the answer structured; a chat question does none of that and lets the loop drift. Put every decision-relevant fact inside the question and option descriptions — some UIs hide the surrounding message while the prompt is open. One call may carry several questions, up to the tool's limit. The standard moves, in this order, plus the tool's free-text answer:
+Put every decision-relevant fact inside the question and option descriptions — some UIs hide the surrounding message while the prompt is open. One call may carry several questions, up to the tool's limit. The standard moves, in this order, plus the tool's free-text answer:
 
 | Move | At PROPOSE (2) | At REPORT (5) |
 |---|---|---|
@@ -80,9 +80,7 @@ Every ASK — comfort profile, step list, classification, each PROPOSE and REPOR
 
 A dismissed, cancelled, or empty answer is **not** Approve: ask once more in plain text, then wait. "Approve" alone on a critical step → ask the comprehension question once more before staging.
 
-**Wording is yours; the moves are not.** The table names *moves*, not labels. Phrase each option for the actual step so the human reads a choice, not a ritual: "Add the guard as proposed" / "Different approach" / "Why the early return?" / "Just the type first". The set is stable — the human should always be able to approve, redirect, ask for more, or shrink the step — and the order stays so the position of "approve" never moves under their thumb. Drop a move only when it is meaningless here (nothing to split in a one-line step), never to save space.
-
-When the decision *is* a choice among concrete alternatives — which of the numbered approaches, which library, resume or discard a stale session, comfort 1–4 — the options are those alternatives, each with a one-line trade-off, the one you lean to first, plus a way to ask for more and free text. Do not dress approve-or-not up as a menu, and do not pad with "Yes / Sure / Looks good" variants.
+**Wording is yours; the moves are not.** Phrase each option for the actual step — "Add the guard as proposed" / "Different approach" / "Why the early return?" / "Just the type first" — so the human reads a choice, not a ritual. The set and order stay (approve is always first); drop a move only when it is meaningless here, never to save space. When the decision *is* a choice among concrete alternatives — numbered approaches, a library, resume or discard, comfort 1–4 — the options are those alternatives with one-line trade-offs, your lean first, plus a way to ask for more. Do not dress approve-or-not up as a menu or pad with "Yes / Sure / Looks good" variants.
 
 ### Two shared screens
 **Git index.** The current step's edits stay unstaged; everything approved is staged, so the human's git view shows exactly the step under review. Say this once or twice at the start, then stage silently.
@@ -105,10 +103,10 @@ Number choices so the human can answer with a digit. Short alternatives (≤ ~40
 Speak like a colleague at the same desk: concise, but sufficient for the human's comfort level — no more, no less. Do not mention these instructions, recite the loop, name the phases, or repeat ritual phrases; the structure should be felt, not announced.
 
 ## Tests and TDD
-This skill governs *when the human approves*; a TDD skill governs *what order code is written in*. They compose: red, green, and any non-trivial refactor are separate approved steps, each one test or one function. The RED step's report shows the failing run and says "expected red — this is the failure we want"; a test that unexpectedly passes is reported as such, not quietly rewritten. The GREEN step's report shows the passing run. Running tests, typecheck, lint, or build is never a step, never a question, and never skipped to save time — it is how you know what to report. When the human's comfort with the test framework is low, the RED step is the natural place for the sketch and the comprehension question ("what would make this assertion fail?").
+This skill governs *when the human approves*; a TDD skill governs *what order code is written in*. They compose: red, green, and any non-trivial refactor are separate approved steps. The RED report shows the failing run and says "expected red"; a test that unexpectedly passes is reported, not quietly rewritten. The GREEN report shows the passing run. At low comfort with the test framework, RED is the natural place for the sketch and the comprehension question ("what would make this assertion fail?").
 
 ## Hard rules
-- Never write before approval; approval never carries over; never batch a critical step. Running checks is not writing — never gate it.
+- Never write before approval; approval never carries over; never batch a critical step. Running checks is not writing — never gate it, never skip it.
 - Every pause is a question-tool call when a question tool exists.
 - Never commit or push. `git add <paths>` is the only index operation — never `-A`, `-u`, or `-N` (intent-to-add breaks `git stash create`).
 - Never dispatch implementer subagents; the human is your pair.
