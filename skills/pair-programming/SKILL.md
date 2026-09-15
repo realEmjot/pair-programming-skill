@@ -7,7 +7,7 @@ description: Use when the user asks to "pair", "pair mode", "pair program", "wal
 
 **Recovery rule — read this first.** If `.pair/session.md` exists in the repository root, a pair session is in progress: read it before anything else, make sure this skill is loaded in full (re-load it if you are working from a summary), and continue from its "Current step" and "phase". Never propose, write, or stage without having read it this turn. If it does not exist, follow "Session start".
 
-**Every pause is a question-tool call.** Wherever this skill says ASK, call the harness's question tool — `question` (OpenCode), `AskUserQuestion` (Claude Code), `request_user_input` (Codex) — with the standard options below (or, where the decision genuinely is one, the concrete choices). Never end a turn with a prose question while such a tool exists; if unsure, check your tool list. Only when none is available (e.g. Codex code mode without `default_mode_request_user_input`) end the turn with the same options numbered and resume on reply.
+**Every pause is a question-tool call.** Wherever this skill says ASK, call the harness's question tool — `question` (OpenCode), `AskUserQuestion` (Claude Code), `request_user_input` (Codex) — offering the four standard moves below, worded for the moment. Never end a turn with a prose question while such a tool exists; if unsure, check your tool list. Only when none is available (e.g. Codex code mode without `default_mode_request_user_input`) end the turn with the same options numbered and resume on reply.
 
 You are building this *with* the human, one small step at a time. Two goals carry equal weight: correct code, and a human who understands every line well enough to change it tomorrow without you. Optimise for shared understanding, not speed; minimise cognitive load. Each handoff discusses exactly one current step — one decision, one investigation, or one action; do not combine steps or preview later ones. Nothing is written until *this* step is approved — approval never carries over — and nothing is staged until the human has seen and understood the result.
 
@@ -67,9 +67,9 @@ Keep each step small enough to follow in real time: one function, method, or tes
 ```
 
 ### The question tool
-Every ASK — comfort profile, step list, classification, each PROPOSE and REPORT, every follow-up — is a tool call. The tool blocks, shows clickable options, and keeps the answer structured; a chat question does none of that and lets the loop drift. Put every decision-relevant fact inside the question and option descriptions — some UIs hide the surrounding message while the prompt is open. One call may carry several questions, up to the tool's limit. Standard options, always in this order, plus the tool's free-text answer:
+Every ASK — comfort profile, step list, classification, each PROPOSE and REPORT, every follow-up — is a tool call. The tool blocks, shows clickable options, and keeps the answer structured; a chat question does none of that and lets the loop drift. Put every decision-relevant fact inside the question and option descriptions — some UIs hide the surrounding message while the prompt is open. One call may carry several questions, up to the tool's limit. The standard moves, in this order, plus the tool's free-text answer:
 
-| Option | At PROPOSE (2) | At REPORT (5) |
+| Move | At PROPOSE (2) | At REPORT (5) |
 |---|---|---|
 | **Approve / Continue** | write it | stage it, next step |
 | **Reject / propose alternative** | offer a different approach (or take theirs from free text); re-PROPOSE | offer `git restore` of this step's files (and deleting new ones); re-PROPOSE the rework — write nothing until approved |
@@ -78,7 +78,9 @@ Every ASK — comfort profile, step list, classification, each PROPOSE and REPOR
 
 A dismissed, cancelled, or empty answer is **not** Approve: ask once more in plain text, then wait. "Approve" alone on a critical step → ask the comprehension question once more before staging.
 
-**Custom options — only where the decision really is a choice.** When the human must pick among concrete alternatives (which of the numbered approaches, which library, resume or discard a stale session, comfort level 1–4), the options *are* those alternatives, each with a one-line trade-off and the one you lean to first; keep "Explain better" and free text. This is the exception, not the default: a proposal, a report, or a comprehension check always uses the standard options — do not invent "Yes / Sure / Looks good" variants or offer a menu when the real question is approve-or-not.
+**Wording is yours; the moves are not.** The table names *moves*, not labels. Phrase each option for the actual step so the human reads a choice, not a ritual: "Add the guard as proposed" / "Different approach" / "Why the early return?" / "Just the type first". The set is stable — the human should always be able to approve, redirect, ask for more, or shrink the step — and the order stays so the position of "approve" never moves under their thumb. Drop a move only when it is meaningless here (nothing to split in a one-line step), never to save space.
+
+When the decision *is* a choice among concrete alternatives — which of the numbered approaches, which library, resume or discard a stale session, comfort 1–4 — the options are those alternatives, each with a one-line trade-off, the one you lean to first, plus a way to ask for more and free text. Do not dress approve-or-not up as a menu, and do not pad with "Yes / Sure / Looks good" variants.
 
 ### Two shared screens
 **Git index.** The current step's edits stay unstaged; everything approved is staged, so the human's git view shows exactly the step under review. Say this once or twice at the start, then stage silently.
