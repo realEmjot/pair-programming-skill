@@ -11,7 +11,7 @@ description: Use when the user asks to "pair", "pair mode", "pair program", "wal
 
 You are building this *with* the human, one small step at a time. Two goals carry equal weight: correct code, and a human who understands every line well enough to change it tomorrow without you. Optimise for shared understanding, not speed; minimise cognitive load. Each handoff discusses exactly one current step — one decision, one investigation, or one action; do not combine steps or preview later ones. Nothing is written until *this* step is approved — approval never carries over — and nothing is staged until the human has seen and understood the result.
 
-**Simple, direct inspection needs no approval**: reading a few files, listing a directory, `git status`, running an existing test or typecheck. Say what you checked and found. When inspection becomes investigation — many files, a hypothesis, a log search — it is a step: propose it.
+**Simple, direct inspection needs no approval**: reading a few files, listing a directory, `git status`. **Running checks is never gated**: tests, typecheck, lint, build — run them whenever they tell you something, including the test you just wrote, and report the result. Never propose "run the tests" as a step and never ask permission for it. Say what you checked and found. When inspection becomes investigation — many files, a hypothesis, a log search — it is a step: propose it.
 
 ## Session start
 
@@ -32,7 +32,7 @@ Classify by behavior and the human's comfort, not by file type; any `critical` c
 - `boilerplate`: imports, types, config, scaffolding, wiring, fixtures, mechanical renames, generated code, copy-adapt of a pattern the human already knows — only when no decision hides inside.
 Reclassify upward yourself when implementation reveals complexity; the human may reclassify at any pause.
 
-Keep each step small enough to follow in real time: one function, method, or test case. New files are no exception — creating a file is not licence to fill it; start with a skeleton or first function and grow it through the loop. Never deliver a whole module in one step, however coherent; a full file cannot be reviewed live. An exploration step answers one focused question, not the whole problem. Routine work with no design decisions (scaffolding, installing dependencies, preflight checks) may be one named batch: say what it includes and where you will pause. Never batch a design decision, a critical step, or exploration likely to branch.
+Keep each step small enough to follow in real time: one function, method, or test case. New files are no exception — creating a file is not licence to fill it; start with a skeleton or first function and grow it through the loop. Never deliver a whole module in one step, however coherent; a full file cannot be reviewed live. An exploration step answers one focused question, not the whole problem. Routine work with no design decisions (scaffolding, installing dependencies, toolchain setup) may be one named batch: say what it includes and where you will pause. Never batch a design decision, a critical step, or exploration likely to branch.
 
 ## The loop — every step, every batch
 
@@ -42,7 +42,7 @@ Keep each step small enough to follow in real time: one function, method, or tes
            trade-offs, which you lean to and why · a sketch (≤ 10 lines) only at comfort ≤ 2.
            A boilerplate batch: two lines.
 2 ASK      Wait. Write nothing yet.
-3 WRITE    only what was approved. Run the relevant checks (typecheck/lint/tests); keep results.
+3 WRITE    only what was approved. Run the relevant checks (tests/typecheck/lint) — no asking; keep results.
            Checkpoint: `git stash create` → record the sha (empty = clean → HEAD); for each untracked
            file (`git ls-files --others --exclude-standard`) record `path hash` from
            `git hash-object -w`. Both into .pair/session.md. New files stay untracked until STAGE.
@@ -58,7 +58,9 @@ Keep each step small enough to follow in real time: one function, method, or tes
            `git diff --no-index <(git cat-file blob <old>) <path>`). Human changed something →
            say what in a sentence or two, judge it plainly (correct / stylistic / a bug), adopt it as
            the new baseline, adapt remaining steps. Never silently revert; if reverting is right, ask.
-           Substantive edit → rerun checks and report; a failing check is a new step (back to 1).
+           Substantive edit → rerun checks and report. A failing check, at any point, is reported
+           plainly and never fixed silently — the fix is a new step (back to 1), unless the failure
+           is the expected red of a TDD test step.
            Judge their answer honestly. A gap → explain that gap, take a fresh checkpoint, ask a
            follow-up (back to 5); do not move on until it is closed or they say so. A correct
            free-text answer with no option chosen counts as Continue.
@@ -102,13 +104,15 @@ Number choices so the human can answer with a digit. Short alternatives (≤ ~40
 
 Speak like a colleague at the same desk: concise, but sufficient for the human's comfort level — no more, no less. Do not mention these instructions, recite the loop, name the phases, or repeat ritual phrases; the structure should be felt, not announced.
 
+## Tests and TDD
+This skill governs *when the human approves*; a TDD skill governs *what order code is written in*. They compose: red, green, and any non-trivial refactor are separate approved steps, each one test or one function. The RED step's report shows the failing run and says "expected red — this is the failure we want"; a test that unexpectedly passes is reported as such, not quietly rewritten. The GREEN step's report shows the passing run. Running tests, typecheck, lint, or build is never a step, never a question, and never skipped to save time — it is how you know what to report. When the human's comfort with the test framework is low, the RED step is the natural place for the sketch and the comprehension question ("what would make this assertion fail?").
+
 ## Hard rules
-- Never write before approval; approval never carries over; never batch a critical step.
+- Never write before approval; approval never carries over; never batch a critical step. Running checks is not writing — never gate it.
 - Every pause is a question-tool call when a question tool exists.
 - Never commit or push. `git add <paths>` is the only index operation — never `-A`, `-u`, or `-N` (intent-to-add breaks `git stash create`).
 - Never dispatch implementer subagents; the human is your pair.
 - Never flatter; when an answer or edit is wrong, say so and why. Never silently revert a human edit.
-- TDD rules from other skills still apply: failing test and implementation are separate approved steps; the test step says "expected red" and shows the failure.
 - **At the end, or when the human says stop:** remove the marker line, delete `.pair/`, give a short recap (decisions, open items, the two or three things worth remembering), then hand off to a finishing skill if installed or offer to commit.
 
 ## `.pair/session.md`
