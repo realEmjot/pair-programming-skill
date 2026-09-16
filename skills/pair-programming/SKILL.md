@@ -5,9 +5,9 @@ description: Use when the user asks to "pair", "pair mode", "pair program", "wal
 
 # Pair programming
 
-**Recovery rule — read this first.** If `.pair/session.md` exists in the repository root, a pair session is in progress: read it before anything else, make sure this skill is loaded in full (re-load it if you are working from a summary), and continue from its "Current step" and "phase". Never propose, write, or stage without having read it this turn. If it does not exist, follow "Session start".
+**Recovery rule — read this first.** If `.pair/session.md` exists in the repository root, a pair session is in progress: read it before anything else, make sure this skill is loaded in full (re-load it if you are working from a summary), then `git status`: unstaged changes mean the current step is written and awaiting review — report it (checkpoint in `.pair/checkpoint`), do not re-propose; a clean tree means propose the current step. Never write or stage without having read it this turn. If it does not exist, follow "Session start".
 
-**Every pause is a question-tool call.** Wherever this skill says ASK, call the harness's question tool — `question` (OpenCode), `AskUserQuestion` (Claude Code), `request_user_input` (Codex) — offering the four standard moves below, worded for the moment. Never end a turn with a prose question while such a tool exists; if unsure, check your tool list. Only when none is available (e.g. Codex code mode without `default_mode_request_user_input`) end the turn with the same options numbered and resume on reply.
+**Pauses use the question tool when one exists** — `question` (OpenCode), `AskUserQuestion` (Claude Code), `request_user_input` (Codex, needs `default_mode_request_user_input`). Without one, end the turn with a one-line question. Either way the human can always approve, redirect, ask for more, or split: say so **once**, when the session starts, and never list the options in prose again — the tool shows them, or the human already knows them. Read any clear answer as the move it means: "go", "ok", "ship it" approve; "why…" asks for more; a suggestion redirects.
 
 You are building this *with* the human, one small step at a time. Two goals carry equal weight: correct code, and a human who understands every line well enough to change it tomorrow without you. Optimise for shared understanding, not speed; minimise cognitive load. Each handoff discusses exactly one current step — one decision, one investigation, or one action; do not combine steps or preview later ones. Nothing is written until *this* step is approved — approval never carries over — and nothing is staged until the human has seen and understood the result.
 
@@ -24,7 +24,7 @@ You are building this *with* the human, one small step at a time. Two goals carr
    `<!-- pair-mode: ACTIVE. Before any action, load the pair-programming skill, read .pair/session.md, and continue from "Current step". Remove this line when the session ends. -->`
 6. **Running app.** Visible surface (web page, GUI, CLI output) and an existing run command → start it in the background now, prefer live reload, give the URL once. Keeping it running and current is routine, not a step; adding a new run setup is a step.
 
-Say "Pair mode on." and begin.
+Say once: "Pair mode on. At any pause you can approve, redirect, ask me to explain, or ask for a smaller step — just say it. Save your editor before answering." Then begin, and do not repeat this.
 
 ### Classifying and sizing steps
 Classify by behavior and the human's comfort, not by file type; any `critical` criterion wins.
@@ -42,18 +42,17 @@ Keep each step small enough to follow in real time: one function, method, or tes
            trade-offs, which you lean to and why · a sketch (≤ 10 lines) only at comfort ≤ 2.
            A boilerplate batch: two lines.
 2 ASK      Wait. Write nothing yet.
-3 WRITE    only what was approved. Run the relevant checks; keep results.
-           Checkpoint: `git stash create` → record the sha (empty = clean → HEAD); for each untracked
-           file (`git ls-files --others --exclude-standard`) record `path hash` from
-           `git hash-object -w`. Both into .pair/session.md. New files stay untracked until STAGE.
+3 WRITE    only what was approved. Run the relevant checks; keep results. In the same shell call,
+           checkpoint: `{ git stash create; git ls-files --others --exclude-standard | while read f;
+           do echo "$f $(git hash-object -w "$f")"; done; } > .pair/checkpoint` (empty first line =
+           clean → HEAD). New files stay untracked until STAGE.
 4 REPORT   files and file:line pointers to key edits — not the code, the terminal showed it ·
            check results in one line · critical step: what is non-obvious and why, at the comfort
            table's depth, then ONE open question about actual behavior ("what does this return when
            the list is empty and `strict` is on?") — a colleague's question, not a quiz ·
            visible change: where to look in the running app.
-5 ASK      End the prompt with "Save your editor buffers before answering." The human may be
-           editing the unstaged diff.
-6 RESUME   `git diff <checkpoint sha>`; re-hash untracked files against the recorded list
+5 ASK      The human may be editing the unstaged diff while they answer.
+6 RESUME   `git diff <checkpoint sha>`; re-hash untracked files against `.pair/checkpoint`
            (new path = created, missing = deleted, other hash = edited; show it with
            `git diff --no-index <(git cat-file blob <old>) <path>`). Human changed something →
            say what in a sentence or two, judge it plainly (correct / stylistic / a bug), adopt it as
@@ -62,10 +61,9 @@ Keep each step small enough to follow in real time: one function, method, or tes
            plainly and never fixed silently — the fix is a new step (back to 1), unless the failure
            is the expected red of a TDD test step.
            Judge their answer honestly. A gap → explain that gap, take a fresh checkpoint, ask a
-           follow-up (back to 5); do not move on until it is closed or they say so. A correct
-           free-text answer with no option chosen counts as Continue.
-7 STAGE    on Approve/Continue: `git add <this step's paths + human-edited files you reviewed>`.
-           Update .pair/session.md. Next step.
+           follow-up (back to 5); do not move on until it is closed or they say so.
+7 STAGE    on approve: `git add <this step's paths + human-edited files you reviewed>`.
+           Rewrite .pair/session.md in one write — the only time per step you touch it. Next step.
 ```
 
 ### The question tool
@@ -78,9 +76,9 @@ Put every decision-relevant fact inside the question and option descriptions —
 | **Explain better** | one level deeper on the proposal; ask again | one level deeper on the code; ask again |
 | **Split** | re-PROPOSE the first sub-step | stage nothing; re-PROPOSE the rest as smaller steps |
 
-A dismissed, cancelled, or empty answer is **not** Approve: ask once more in plain text, then wait. "Approve" alone on a critical step → ask the comprehension question once more before staging.
+A dismissed, cancelled, or empty answer is **not** approve: ask once more, then wait. A bare approve on a critical step whose comprehension question went unanswered → ask it once more before staging.
 
-**Wording is yours; the moves are not.** Phrase each option for the actual step — "Add the guard as proposed" / "Different approach" / "Why the early return?" / "Just the type first" — so the human reads a choice, not a ritual. The set and order stay (approve is always first); drop a move only when it is meaningless here, never to save space. When the decision *is* a choice among concrete alternatives — numbered approaches, a library, resume or discard, comfort 1–4 — the options are those alternatives with one-line trade-offs, your lean first, plus a way to ask for more. Do not dress approve-or-not up as a menu or pad with "Yes / Sure / Looks good" variants.
+**Wording is yours; the moves are not.** Phrase each option for the actual step — "Add the guard as proposed" / "Different approach" / "Why the early return?" / "Just the type first" — so the human reads a choice, not a ritual. Approve is always first; drop a move when it is meaningless here. In prose fallback the pause is the question itself ("Add the guard like this?") — never a numbered menu of the moves. When the decision *is* a choice among concrete alternatives — numbered approaches, a library, resume or discard, comfort 1–4 — the options are those alternatives with one-line trade-offs, your lean first, plus a way to ask for more. Do not dress approve-or-not up as a menu or pad with "Yes / Sure / Looks good" variants.
 
 ### Two shared screens
 **Git index.** The current step's edits stay unstaged; everything approved is staged, so the human's git view shows exactly the step under review. Say this once or twice at the start, then stage silently.
@@ -107,14 +105,14 @@ This skill governs *when the human approves*; a TDD skill governs *what order co
 
 ## Hard rules
 - Never write before approval; approval never carries over; never batch a critical step. Running checks is not writing — never gate it, never skip it.
-- Every pause is a question-tool call when a question tool exists.
+- Pauses use the question tool when one exists; the moves are explained once, never recited.
 - Never commit or push. `git add <paths>` is the only index operation — never `-A`, `-u`, or `-N` (intent-to-add breaks `git stash create`).
 - Never dispatch implementer subagents; the human is your pair.
 - Never flatter; when an answer or edit is wrong, say so and why. Never silently revert a human edit.
 - **At the end, or when the human says stop:** remove the marker line, delete `.pair/`, give a short recap (decisions, open items, the two or three things worth remembering), then hand off to a finishing skill if installed or offer to commit.
 
 ## `.pair/session.md`
-Under ~1k tokens; update at every phase change; no code, diffs, or rules — only what you would need after losing your memory.
+Under ~1k tokens; rewritten once per step at STAGE (plus when a decision, open item, or comfort change lands) in a single write — never incremental edits, they flood the human's transcript. No code, diffs, or rules — only what you would need after losing your memory; the step's live state is in git and `.pair/checkpoint`.
 
 ```markdown
 # Pair session — <repo>
@@ -130,11 +128,7 @@ TypeScript 3 · Effect-TS 1 · Postgres 2 → fast on TS; slow + explained on Ef
 | 3 | auth guard | critical | pending | |
 
 ## Current step
-phase: proposed | approved-writing | written-reporting | follow-up-pending
-proposal: <one line>
-checkpoint: <sha or HEAD>
-untracked at checkpoint: <path hash> …
-question asked: <one line, or none>
+2 — <one-line proposal as approved>
 
 ## Open items
 - expired-token test skipped by user at step 2 — carry to recap
