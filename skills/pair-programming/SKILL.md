@@ -5,7 +5,7 @@ description: Use when the user asks to "pair", "pair mode", "pair program", "wal
 
 # Pair programming
 
-**Recovery rule — read this first.** If `.pair/session.md` exists in the repository root, a pair session is in progress: read it before anything else, make sure this skill is loaded in full (re-load it if you are working from a summary), then `git status`: unstaged changes mean the current step is written and awaiting review — report it (checkpoint in `.pair/checkpoint`), do not re-propose; a clean tree means propose the current step. Never write or stage without having read it this turn. If it does not exist, follow "Session start".
+**Recovery rule — read this first.** If `.pair/session.md` exists in the repository root, a pair session is in progress: read it before anything else, make sure this skill is loaded in full (re-load it if you are working from a summary), then `git status`: unstaged changes mean the current step is written and awaiting review — report it, do not re-propose; nothing unstaged means propose the current step. Never write or stage without having read it this turn. If it does not exist, follow "Session start".
 
 **Pauses use the question tool when one exists** — `question` (OpenCode), `AskUserQuestion` (Claude Code), `request_user_input` (Codex, needs `default_mode_request_user_input`). Without one, end the turn with a one-line question. Either way the human can always approve, redirect, ask for more, or split: say so **once**, when the session starts, and never list the options in prose again — the tool shows them, or the human already knows them. Read any clear answer as the move it means: "go", "ok", "ship it" approve; "why…" asks for more; a suggestion redirects.
 
@@ -16,7 +16,7 @@ You are building this *with* the human, one small step at a time. Two goals carr
 ## Session start
 
 0. **Stale session?** A marker line or `.pair/session.md` already present → ASK: resume at the recorded step, or discard. Do this before checking the tree; a resumable session has staged work.
-1. **Preconditions.** Git repository, at least one commit, clean tree (if dirty, ask the human to commit or stash). Never `git worktree add` in this session. No git → **no-git mode**: skip the loop's git commands and say once: "Without git I cannot see edits you make between steps — tell me about them." If a sandbox blocks writes to `.git`, ask for approval rather than skipping the checkpoint.
+1. **Preconditions.** Git repository, at least one commit, clean tree (if dirty, ask the human to commit or stash). No git → skip STAGE and say once: "Without git I cannot see edits you make between steps — tell me about them."
 2. **Comfort profile.** Infer the technologies this work touches (languages, frameworks, libraries, tools). ASK one question per technology in one call (more only if the tool caps questions): `1 new` / `2 basics` / `3 working` / `4 fluent`, plus free text for anything missed. State the consequences in two or three lines ("fast on TypeScript; slow and explained on Effect layers; assuming SQL") and ASK to confirm.
 3. **Step list.** A named or obvious plan file → its tasks are the steps. Otherwise build the list through the loop: propose, ASK, refine. Planning skills installed (brainstorming, writing-plans, …) → run their phases as pair steps, each section or task approved before it is written.
 4. **Classify** each step (below) with a one-line reason; group consecutive boilerplate into named batches — one batch is one loop pass. Show the table; ASK.
@@ -42,27 +42,23 @@ Keep each step small enough to follow in real time: one function, method, or tes
            trade-offs, which you lean to and why · a sketch (≤ 10 lines) only at comfort ≤ 2.
            A boilerplate batch: two lines.
 2 ASK      Wait. Write nothing yet.
-3 WRITE    only what was approved. Run the relevant checks; keep results. In the same shell call,
-           checkpoint: `{ git stash create; git ls-files --others --exclude-standard | while read f;
-           do echo "$f $(git hash-object -w "$f")"; done; } > .pair/checkpoint` (empty first line =
-           clean → HEAD). New files stay untracked until STAGE.
+3 WRITE    only what was approved. Run the relevant checks; keep results.
 4 REPORT   files and file:line pointers to key edits — not the code, the terminal showed it ·
            check results in one line · critical step: what is non-obvious and why, at the comfort
            table's depth, then ONE open question about actual behavior ("what does this return when
            the list is empty and `strict` is on?") — a colleague's question, not a quiz ·
            visible change: where to look in the running app.
 5 ASK      The human may be editing the unstaged diff while they answer.
-6 RESUME   `git diff <checkpoint sha>`; re-hash untracked files against `.pair/checkpoint`
-           (new path = created, missing = deleted, other hash = edited; show it with
-           `git diff --no-index <(git cat-file blob <old>) <path>`). Human changed something →
-           say what in a sentence or two, judge it plainly (correct / stylistic / a bug), adopt it as
-           the new baseline, adapt remaining steps. Never silently revert; if reverting is right, ask.
+6 RESUME   `git diff` + `git status --short`: the unstaged changes are this step plus anything the
+           human did while answering — compare with what you wrote. Human changed something → say
+           what in a sentence or two, judge it plainly (correct / stylistic / a bug), adopt it as the
+           new baseline, adapt remaining steps. Never silently revert; if reverting is right, ask.
            Substantive edit → rerun checks and report. A failing check, at any point, is reported
            plainly and never fixed silently — the fix is a new step (back to 1), unless the failure
            is the expected red of a TDD test step.
            Judge their answer honestly. A gap → explain that gap, take a fresh checkpoint, ask a
            follow-up (back to 5); do not move on until it is closed or they say so.
-7 STAGE    on approve: `git add <this step's paths + human-edited files you reviewed>`.
+7 STAGE    on approve: `git add <this step's paths + human-edited files you reviewed>` — one call.
            Rewrite .pair/session.md in one write — the only time per step you touch it. Next step.
 ```
 
@@ -81,7 +77,7 @@ A dismissed, cancelled, or empty answer is **not** approve: ask once more, then 
 **Wording is yours; the moves are not.** Phrase each option for the actual step — "Add the guard as proposed" / "Different approach" / "Why the early return?" / "Just the type first" — so the human reads a choice, not a ritual. Approve is always first; drop a move when it is meaningless here. In prose fallback the pause is the question itself ("Add the guard like this?") — never a numbered menu of the moves. When the decision *is* a choice among concrete alternatives — numbered approaches, a library, resume or discard, comfort 1–4 — the options are those alternatives with one-line trade-offs, your lean first, plus a way to ask for more. Do not dress approve-or-not up as a menu or pad with "Yes / Sure / Looks good" variants.
 
 ### Two shared screens
-**Git index.** The current step's edits stay unstaged; everything approved is staged, so the human's git view shows exactly the step under review. Say this once or twice at the start, then stage silently.
+**Git index.** Everything approved is staged; the current step stays unstaged, so `git diff` shows exactly the step under review — for both of you. Say this once at the start, then stage silently.
 **Running app.** After any visible change, direct the human to look — URL or window the first time, then just what to look for. Them seeing it beats you describing or verifying it. Rebuild or reload yourself when it is not automatic.
 
 ## Comfort → how you behave
@@ -106,13 +102,13 @@ This skill governs *when the human approves*; a TDD skill governs *what order co
 ## Hard rules
 - Never write before approval; approval never carries over; never batch a critical step. Running checks is not writing — never gate it, never skip it.
 - Pauses use the question tool when one exists; the moves are explained once, never recited.
-- Never commit or push. `git add <paths>` is the only index operation — never `-A`, `-u`, or `-N` (intent-to-add breaks `git stash create`).
+- Never commit or push. `git add <paths>` is the only git write — never `-A` or `-u`, no stash, no worktrees.
 - Never dispatch implementer subagents; the human is your pair.
 - Never flatter; when an answer or edit is wrong, say so and why. Never silently revert a human edit.
 - **At the end, or when the human says stop:** remove the marker line, delete `.pair/`, give a short recap (decisions, open items, the two or three things worth remembering), then hand off to a finishing skill if installed or offer to commit.
 
 ## `.pair/session.md`
-Under ~1k tokens; rewritten once per step at STAGE (plus when a decision, open item, or comfort change lands) in a single write — never incremental edits, they flood the human's transcript. No code, diffs, or rules — only what you would need after losing your memory; the step's live state is in git and `.pair/checkpoint`.
+Under ~1k tokens; rewritten once per step at STAGE (plus when a decision, open item, or comfort change lands) in a single write — never incremental edits, they flood the human's transcript. No code, diffs, or rules — only what you would need after losing your memory; the step's live state is the unstaged diff.
 
 ```markdown
 # Pair session — <repo>
