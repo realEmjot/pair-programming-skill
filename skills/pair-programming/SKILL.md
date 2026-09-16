@@ -56,7 +56,7 @@ Keep each step small enough to follow in real time: one function, method, or tes
            Substantive edit → rerun checks and report. A failing check, at any point, is reported
            plainly and never fixed silently — the fix is a new step (back to 1), unless the failure
            is the expected red of a TDD test step.
-           Judge their answer honestly. A gap → explain that gap, take a fresh checkpoint, ask a
+           Judge their answer honestly. A gap → explain that gap, ask a
            follow-up (back to 5); do not move on until it is closed or they say so.
 7 STAGE    on approve: `git add <this step's paths + human-edited files you reviewed>` — one call.
            Rewrite .pair/session.md in one write — the only time per step you touch it. Next step.
