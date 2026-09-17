@@ -45,8 +45,9 @@ Keep each step small enough to follow in real time: one function, method, or tes
 3 WRITE    only what was approved. Run the relevant checks; keep results.
 4 REPORT   files and file:line pointers to key edits — not the code, the terminal showed it ·
            check results in one line · critical step: what is non-obvious and why, at the comfort
-           table's depth, then ONE open question about actual behavior ("what does this return when
-           the list is empty and `strict` is on?") — a colleague's question, not a quiz ·
+           table's depth · a comprehension question ONLY on evidence of a gap (below) — then ONE open
+           question about actual behavior ("what does this return when the list is empty and
+           `strict` is on?"), a colleague's question, not a quiz; no evidence → no question ·
            visible change: where to look in the running app.
 5 ASK      The human may be editing the unstaged diff while they answer.
 6 RESUME   `git diff` + `git status --short`: the unstaged changes are this step plus anything the
@@ -56,11 +57,14 @@ Keep each step small enough to follow in real time: one function, method, or tes
            Substantive edit → rerun checks and report. A failing check, at any point, is reported
            plainly and never fixed silently — the fix is a new step (back to 1), unless the failure
            is the expected red of a TDD test step.
-           Judge their answer honestly. A gap → explain that gap, ask a
-           follow-up (back to 5); do not move on until it is closed or they say so.
+           If a comprehension question was asked, judge the answer honestly. A gap → explain that
+           gap, ask a follow-up (back to 5); do not move on until it is closed or they say so.
 7 STAGE    on approve: `git add <this step's paths + human-edited files you reviewed>` — one call.
            Rewrite .pair/session.md in one write — the only time per step you touch it. Next step.
 ```
+
+### Evidence of a gap
+A comprehension question is a response to something the human did, never a ritual. Ask one when, in this step or the previous one, the human: asked why/how/what something does or chose "Explain better"; answered a question wrongly or vaguely; edited the diff in a way that introduced a bug or contradicted the agreed design; said they were unsure ("I think", "I guess", "not sure I follow"). Aim the question at that gap. A history of clean approvals, a critical classification, or a low comfort rating is not evidence — explain at the comfort table's depth and ask for approval only.
 
 ### The question tool
 Put every decision-relevant fact inside the question and option descriptions — some UIs hide the surrounding message while the prompt is open. One call may carry several questions, up to the tool's limit. The standard moves, in this order, plus the tool's free-text answer:
@@ -82,12 +86,14 @@ A dismissed, cancelled, or empty answer is **not** approve: ask once more, then 
 
 ## Comfort → how you behave
 
-| Comfort | Proposal | Explanation depth | Comprehension question | Batching |
+| Comfort | Proposal | Explanation depth | Follow-up when a gap shows | Batching |
 |---|---|---|---|---|
-| 1 new | + sketch; name the concept and what it is for | every non-obvious line; define terms | every critical step; expect follow-ups | never for this technology |
-| 2 basics | + sketch when the idiom is unusual | the why, not the what | every critical step | pure boilerplate only |
-| 3 working | intent only | trade-offs and surprises | every critical step, brief | normal |
-| 4 fluent | intent only | genuine surprises only | may skip, with a one-line reason | aggressive |
+| 1 new | + sketch; name the concept and what it is for | every non-obvious line; define terms | question + follow-ups until closed | never for this technology |
+| 2 basics | + sketch when the idiom is unusual | the why, not the what | question + one follow-up | pure boilerplate only |
+| 3 working | intent only | trade-offs and surprises | one brief question | normal |
+| 4 fluent | intent only | genuine surprises only | name the gap; question only if they want it | aggressive |
+
+Comfort sets depth, not whether to ask: comprehension questions are triggered by evidence of a gap (above), at every comfort level.
 
 Comfort moves: a correct, idiomatic edit in a technology rated ≤ 2 is evidence — propose raising it, ask first; repeated gaps at ≥ 3 → propose lowering it.
 
@@ -97,7 +103,7 @@ Number choices so the human can answer with a digit. Short alternatives (≤ ~40
 Speak like a colleague at the same desk: concise, but sufficient for the human's comfort level — no more, no less. Do not mention these instructions, recite the loop, name the phases, or repeat ritual phrases; the structure should be felt, not announced.
 
 ## Tests and TDD
-This skill governs *when the human approves*; a TDD skill governs *what order code is written in*. They compose: red, green, and any non-trivial refactor are separate approved steps. The RED report shows the failing run and says "expected red"; a test that unexpectedly passes is reported, not quietly rewritten. The GREEN report shows the passing run. At low comfort with the test framework, RED is the natural place for the sketch and the comprehension question ("what would make this assertion fail?").
+This skill governs *when the human approves*; a TDD skill governs *what order code is written in*. They compose: red, green, and any non-trivial refactor are separate approved steps. The RED report shows the failing run and says "expected red"; a test that unexpectedly passes is reported, not quietly rewritten. The GREEN report shows the passing run. At low comfort with the test framework, RED is the natural place for the sketch — and, when evidence of a gap calls for a comprehension question, for that question ("what would make this assertion fail?").
 
 ## Hard rules
 - Never write before approval; approval never carries over; never batch a critical step. Running checks is not writing — never gate it, never skip it.
@@ -105,6 +111,7 @@ This skill governs *when the human approves*; a TDD skill governs *what order co
 - Never commit or push. `git add <paths>` is the only git write — never `-A` or `-u`, no stash, no worktrees.
 - Never dispatch implementer subagents; the human is your pair.
 - Never flatter; when an answer or edit is wrong, say so and why. Never silently revert a human edit.
+- Comprehension questions only on evidence of a gap or when the human asks to be taught — never as a per-step ritual.
 - **At the end, or when the human says stop:** remove the marker line, delete `.pair/`, give a short recap (decisions, open items, the two or three things worth remembering), then hand off to a finishing skill if installed or offer to commit.
 
 ## `.pair/session.md`
