@@ -17,11 +17,10 @@ You are building this *with* the human, one small step at a time. Two goals carr
 
 0. **Stale session?** A marker line or `.pair/session.md` already present → ASK: resume at the recorded step, or discard. Do this before checking the tree; a resumable session has staged work.
 1. **Preconditions.** Git repository, at least one commit, clean tree (if dirty, ask the human to commit or stash). No git → skip STAGE and say once: "Without git I cannot see edits you make between steps — tell me about them."
-2. **Comfort profile.** Infer the technologies this work touches (languages, frameworks, libraries, tools). ASK one question per technology in one call (more only if the tool caps questions): `1 new` / `2 basics` / `3 working` / `4 fluent`, plus free text for anything missed. State the consequences in two or three lines ("fast on TypeScript; slow and explained on Effect layers; assuming SQL") and ASK to confirm.
+2. **Comfort profile.** Infer the technologies this work touches (languages, frameworks, libraries, tools). ASK one question per technology in one call (more only if the tool caps questions): `new` / `basics` / `working` / `fluent`, plus free text for anything missed. State the consequences in two or three lines ("fast on TypeScript; slow and explained on Effect layers; assuming SQL") and ASK to confirm.
 3. **Step list.** A named or obvious plan file → its tasks are the steps. Otherwise build the list through the loop: propose, ASK, refine. Planning skills installed (brainstorming, writing-plans, …) → run their phases as pair steps, each section or task approved before it is written.
 4. **Classify** each step (below) with a one-line reason; group consecutive boilerplate into named batches — one batch is one loop pass. Show the table; ASK.
-5. **State.** Create `.pair/session.md` (format at the end) and `.pair/.gitignore` containing `*`. Put this exact line at the top of the root `AGENTS.md` (or `CLAUDE.md` if that is what the project has; create `AGENTS.md` if neither exists):
-   `<!-- pair-mode: ACTIVE. Before any action, load the pair-programming skill, read .pair/session.md, and continue from "Current step". Remove this line when the session ends. -->`
+5. **State.** Create `.pair/session.md` (format at the end) and `.pair/.gitignore` containing `*`.
 6. **Running app.** Visible surface (web page, GUI, CLI output) and an existing run command → start it in the background now, prefer live reload, give the URL once. Keeping it running and current is routine, not a step; adding a new run setup is a step.
 
 Say once: "Pair mode on. At any pause you can approve, redirect, ask me to explain, or ask for a smaller step — just say it. Save your editor before answering." Then begin, and do not repeat this.
@@ -67,7 +66,7 @@ Keep each step small enough to follow in real time: one function, method, or tes
 A comprehension question is a response to something the human did, never a ritual. Ask one when, in this step or the previous one, the human: asked why/how/what something does or chose "Explain better"; answered a question wrongly or vaguely; edited the diff in a way that introduced a bug or contradicted the agreed design; said they were unsure ("I think", "I guess", "not sure I follow"). Aim the question at that gap. A history of clean approvals, a critical classification, or a low comfort rating is not evidence — explain at the comfort table's depth and ask for approval only.
 
 ### The question tool
-Put every decision-relevant fact inside the question and option descriptions — some UIs hide the surrounding message while the prompt is open. One call may carry several questions, up to the tool's limit. The standard moves, in this order, plus the tool's free-text answer:
+One call may carry several questions, up to the tool's limit. The standard moves, in this order, plus the tool's free-text answer:
 
 | Move | At PROPOSE (2) | At REPORT (5) |
 |---|---|---|
