@@ -57,13 +57,17 @@ Keep each step small enough to follow in real time: one function, method, or tes
            plainly and never fixed silently — the fix is a new step (back to 1), unless the failure
            is the expected red of a TDD test step.
            If a comprehension question was asked, judge the answer honestly. A gap → explain that
-           gap, ask a follow-up (back to 5); do not move on until it is closed or they say so.
+           gap (a concept → Tutoring, below), ask a follow-up (back to 5); do not move on until it
+           is closed or they say so.
 7 STAGE    on approve: `git add <this step's paths + human-edited files you reviewed>` — one call.
            Rewrite .pair/session.md in one write — the only time per step you touch it. Next step.
 ```
 
 ### Evidence of a gap
 A comprehension question is a response to something the human did, never a ritual. Ask one when, in this step or the previous one, the human: asked why/how/what something does or chose "Explain better"; answered a question wrongly or vaguely; edited the diff in a way that introduced a bug or contradicted the agreed design; said they were unsure ("I think", "I guess", "not sure I follow"). Aim the question at that gap. A history of clean approvals, a critical classification, or a low comfort rating is not evidence — explain at the comfort table's depth and ask for approval only.
+
+### Tutoring
+When the gap is a *concept* rather than a line — a model of how something works that this step or a coming one rests on (what a closure captures, what an index guarantees, what a promise's `then` returns) — become a tutor, unasked. At every comfort rating: a rating the evidence contradicts was wrong for this concept. Under time pressure too: the coming steps rest on the concept, so teaching it now is the short way there. Tutoring is, in order: which part of their model is wrong, plainly · the correct model built from what they already know, in their terms · where it shows in this code and which coming step rests on it · one open question about behaviour that only the correct model answers. Then wait. Move on when the answer shows the model has landed, or when the human declines the lesson after hearing it — "whatever, go ahead" said before it is an approve of the step, not a decline.
 
 ### The question tool
 One call may carry several questions, up to the tool's limit. The standard moves, in this order, plus the tool's free-text answer:
@@ -85,14 +89,14 @@ A dismissed, cancelled, or empty answer is **not** approve: ask once more, then 
 
 ## Comfort → how you behave
 
-| Comfort | Proposal | Explanation depth | Follow-up when a gap shows | Batching |
+| Comfort | Proposal | Explanation depth | Follow-up on a line-level gap | Batching |
 |---|---|---|---|---|
 | 1 new | + sketch; name the concept and what it is for | every non-obvious line; define terms | question + follow-ups until closed | never for this technology |
 | 2 basics | + sketch when the idiom is unusual | the why, not the what | question + one follow-up | pure boilerplate only |
 | 3 working | intent only | trade-offs and surprises | one brief question | normal |
 | 4 fluent | intent only | genuine surprises only | name the gap; question only if they want it | aggressive |
 
-Comfort sets depth, not whether to ask: comprehension questions are triggered by evidence of a gap (above), at every comfort level.
+Comfort sets depth, not whether to ask or teach: comprehension questions and Tutoring are triggered by evidence of a gap (above), at every comfort level.
 
 Comfort moves: a correct, idiomatic edit in a technology rated ≤ 2 is evidence — propose raising it, ask first; repeated gaps at ≥ 3 → propose lowering it.
 
@@ -111,6 +115,7 @@ This skill governs *when the human approves*; a TDD skill governs *what order co
 - Never dispatch implementer subagents; the human is your pair.
 - Never flatter; when an answer or edit is wrong, say so and why. Never silently revert a human edit.
 - Comprehension questions only on evidence of a gap or when the human asks to be taught — never as a per-step ritual.
+- A concept the work rests on that the human has shown they do not hold is taught before anything is built on it — whatever the comfort rating or the clock.
 - **At the end, or when the human says stop:** remove the marker line, delete `.pair/`, give a short recap (decisions, open items, the two or three things worth remembering), then hand off to a finishing skill if installed or offer to commit.
 
 ## `.pair/session.md`

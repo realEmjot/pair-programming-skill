@@ -1,6 +1,6 @@
 # pair-programming
 
-An agent skill that makes a coding agent work *with* you instead of *for* you: it proposes each small step, waits for your approval, writes only that, shows you what it did, checks that you understood, and notices when you edit the result yourself. Pace and depth follow how comfortable you said you are with each technology.
+An agent skill that makes a coding agent work *with* you instead of *for* you: it proposes each small step, waits for your approval, writes only that, shows you what it did, checks that you understood, turns tutor when you show a gap in a concept the work depends on, and notices when you edit the result yourself. Pace and depth follow how comfortable you said you are with each technology.
 
 Zero hooks, zero plugins, zero runtime code — one `SKILL.md`. Works in Claude Code, Codex, OpenCode, and any harness that reads agent skills and has a question tool.
 
