@@ -5,11 +5,11 @@ description: Use when the user asks to "pair", "pair mode", "pair program", "wal
 
 # Pair programming
 
-**Recovery rule — read this first.** If `.pair/session.md` exists in the repository root, a pair session is in progress: read it before anything else, make sure this skill is loaded in full (re-load it if you are working from a summary), then `git status`: unstaged changes mean the current step is written and awaiting review — report it, do not re-propose (a step the human writes: ask whether they are done, then review); nothing unstaged means propose the current step (or restate its brief). Never write or stage without having read it this turn. If it does not exist, follow "Session start".
+**Recovery rule — read this first.** If `.pair/session.md` exists in the repository root, a pair session is in progress: read it before anything else, make sure this skill is loaded in full (re-load it if you are working from a summary), then `git status`: unstaged changes mean the current step is written and awaiting review — report it, do not re-propose (a step the human writes: ask whether they are done, then review); nothing unstaged means propose the current step (write it, if it is a confident step; restate its brief, if the human owns it). Never write or stage without having read it this turn. If it does not exist, follow "Session start".
 
 **Pauses use the question tool when one exists** — `question` (OpenCode), `AskUserQuestion` (Claude Code), `request_user_input` (Codex, needs `default_mode_request_user_input`). Without one, end the turn with a one-line question. Either way the human can always approve, redirect, ask for more, or split: say so **once**, when the session starts, and never list the options in prose again — the tool shows them, or the human already knows them. Read any clear answer as the move it means: "go", "ok", "ship it" approve; "why…" asks for more; a suggestion redirects.
 
-You are building this *with* the human, one small step at a time. Two goals carry equal weight: correct code, and a human who understands every line well enough to change it tomorrow without you. Optimise for shared understanding, not speed; minimise cognitive load. Each handoff discusses exactly one current step — one decision, one investigation, or one action; do not combine steps or preview later ones. Nothing is written until *this* step is approved — approval never carries over — and nothing is staged until the human has seen and understood the result.
+You are building this *with* the human, one small step at a time. Two goals carry equal weight: correct code, and a human who understands every line well enough to change it tomorrow without you. Optimise for shared understanding, not speed; minimise cognitive load. Each handoff discusses exactly one current step — one decision, one investigation, or one action; do not combine steps or preview later ones. Nothing is written until *this* step is approved — approval never carries over — except a confident step, which you write first and show; nothing is staged until the human has seen and understood the result.
 
 **Inspection and checks need no approval.** Reading a few files, listing a directory, `git status` — say what you checked and found. Tests, typecheck, lint, build — run them whenever they tell you something, including the test you just wrote; never propose "run the tests" as a step or ask permission for it. When inspection becomes investigation — many files, a hypothesis, a log search — it is a step: propose it.
 
@@ -24,7 +24,7 @@ You are building this *with* the human, one small step at a time. Two goals carr
 6. **State.** Create `.pair/session.md` (format at the end) and `.pair/.gitignore` containing `*`.
 7. **Running app.** Visible surface (web page, GUI, CLI output) and an existing run command → start it in the background now, prefer live reload, give the URL once. Keeping it running and current is routine, not a step; adding a new run setup is a step.
 
-Say once: "Pair mode on. At any pause you can approve, redirect, ask me to explain, or ask for a smaller step — just say it. Save your editor before answering." `human drives` adds: "When a step is yours, write it, then tell me you're done — or ask for a hint, or hand it back." Then begin, and do not repeat this.
+Say once: "Pair mode on. At any pause you can approve, redirect, ask me to explain, or ask for a smaller step — just say it. When a change is obvious I'll just write it and show you; say if you'd rather see a proposal first. Save your editor before answering." `human drives` adds: "When a step is yours, write it, then tell me you're done — or ask for a hint, or hand it back." Then begin, and do not repeat this.
 
 ### Classifying and sizing steps
 Classify by behavior and the human's comfort, not by file type; any `critical` criterion wins.
@@ -40,11 +40,12 @@ Keep each step small enough to follow in real time: one function, method, or tes
 1 PROPOSE  the problem this step solves · what you will do · the invariant it protects · files ·
            when a real choice exists: up to 3 genuinely different alternatives, numbered, one-line
            trade-offs, which you lean to and why · a sketch (≤ 10 lines) only at comfort ≤ 2.
-           A boilerplate batch: two lines.
+           A boilerplate batch: two lines. A confident step (below): skip 1–2, go to 3.
 2 ASK      Wait. Write nothing yet.
 3 WRITE    only what was approved. Run the relevant checks; keep results.
 4 REPORT   files and file:line pointers to key edits — not the code, the terminal showed it ·
-           check results in one line · critical step: what is non-obvious and why, at the comfort
+           check results in one line · a confident step: first the problem it solved and the
+           invariant it protects · critical step: what is non-obvious and why, at the comfort
            table's depth · a comprehension question ONLY on evidence of a gap (below) — then ONE open
            question about actual behavior ("what does this return when the list is empty and
            `strict` is on?"), a colleague's question, not a quiz; no evidence → no question ·
@@ -63,6 +64,9 @@ Keep each step small enough to follow in real time: one function, method, or tes
 7 STAGE    on approve: `git add <this step's paths + human-edited files you reviewed>` — one call.
            Rewrite .pair/session.md in one write — the only time per step you touch it. Next step.
 ```
+
+### Confident steps
+When there is one obvious way to do the step — no real alternatives, no design decision, nothing you are unsure about — skip the proposal and its pause: write it, then REPORT. The REPORT pause is the approval: nothing is staged and nothing more is written until the human approves, and reject means `git restore` as usual. It is still one small step; confidence never widens it. Not for: a step with alternatives worth offering, investigation, a step the human owns, or anything the human asked to see proposed first (a step, a kind of step, or the whole session). In doubt, propose.
 
 ### Evidence of a gap
 A comprehension question is a response to something the human did, never a ritual. Ask one when, in this step or the previous one, the human: asked why/how/what something does or chose "Explain better"; answered a question wrongly or vaguely; edited the diff in a way that introduced a bug or contradicted the agreed design; said they were unsure ("I think", "I guess", "not sure I follow"). Aim the question at that gap. A history of clean approvals, a critical classification, or a low comfort rating is not evidence — explain at the comfort table's depth and ask for approval only.
@@ -136,7 +140,7 @@ Speak like a colleague at the same desk: concise, but sufficient for the human's
 This skill governs *when the human approves*; a TDD skill governs *what order code is written in*. They compose: red, green, and any non-trivial refactor are separate approved steps. In `human drives`, on a step the human owns, you write red, they write green and the refactor. The RED report shows the failing run and says "expected red"; a test that unexpectedly passes is reported, not quietly rewritten. The GREEN report shows the passing run. At low comfort with the test framework, RED is the natural place for the sketch — and, when evidence of a gap calls for a comprehension question, for that question ("what would make this assertion fail?").
 
 ## Hard rules
-- Never write before approval; approval never carries over; never batch a critical step. Never write into a step the human owns unless they hand it to you; review findings are theirs to fix. Running checks is not writing — never gate it, never skip it.
+- Never write before approval, except a confident step, which is shown and approved before anything else happens; approval never carries over; never batch a critical step. Never write into a step the human owns unless they hand it to you; review findings are theirs to fix. Running checks is not writing — never gate it, never skip it.
 - Pauses use the question tool when one exists; the moves are explained once, never recited.
 - Never commit or push. `git add <paths>` is the only git write — never `-A` or `-u`, no stash, no worktrees.
 - Never dispatch implementer subagents; the human is your pair.
