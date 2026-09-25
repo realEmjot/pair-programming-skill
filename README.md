@@ -1,6 +1,6 @@
 # pair-programming
 
-An agent skill that makes a coding agent work *with* you instead of *for* you: it proposes each small step, waits for your approval, writes only that, shows you what it did, checks that you understood, turns tutor when you show a gap in a concept the work depends on, and notices when you edit the result yourself. Pace and depth follow how comfortable you said you are with each technology.
+An agent skill that makes a coding agent work *with* you instead of *for* you: it proposes each small step, waits for your approval, writes only that, shows you what it did, checks that you understood, turns tutor when you show a gap in a concept the work depends on, and notices when you edit the result yourself. Or flip it: the agent writes the boilerplate and a failing test, you write the interesting part, and it reviews your code. Pace and depth follow how comfortable you said you are with each technology.
 
 Zero hooks, zero plugins, zero runtime code — one `SKILL.md`. Works in Claude Code, Codex, OpenCode, and any harness that reads agent skills and has a question tool.
 
@@ -29,10 +29,11 @@ Restart the harness. Say "let's pair on X", or invoke it directly: `/pair-progra
 ## What a session looks like
 
 1. **Comfort check.** The agent lists the technologies the work will touch and asks how comfortable you are with each (1 new → 4 fluent). Unfamiliar tech gets slow, explained steps; fluent tech gets batched.
-2. **Step list.** Built with you, or taken from an existing plan. Each step is `boilerplate` (batched) or `critical` (one concept at a time).
-3. **Per step:** propose → you approve/reject/split/ask → agent writes → reports with file:line pointers and, for critical steps, one real question about the behavior → you review the unstaged diff in your editor, edit it if you like → agent reads your edits, adopts them, answers, stages.
-4. **Shared screens:** your git view (staged = approved, unstaged = the current step) and, if the work has a UI, the running app.
-5. **End:** a short recap of decisions, open items, and what to remember. Nothing is ever committed by the agent.
+2. **Driver.** *Agent drives* (default): the agent writes every step. *You drive*: the agent writes boilerplate; critical steps are yours — it writes a failing test, briefs you (problem, invariant, where, traps — no code), gives hints only if you ask, then reviews your diff for correctness, tests, and idiom, and says what's good. You fix what it finds; it never touches your code unless you hand a step or finding back. Either of you can flip a single step's owner at any pause.
+3. **Step list.** Built with you, or taken from an existing plan. Each step is `boilerplate` (batched) or `critical` (one concept at a time).
+4. **Per step (agent-written):** propose → you approve/reject/split/ask → agent writes → reports with file:line pointers and, for critical steps, one real question about the behavior → you review the unstaged diff in your editor, edit it if you like → agent reads your edits, adopts them, answers, stages.
+5. **Shared screens:** your git view (staged = approved, unstaged = the current step) and, if the work has a UI, the running app.
+6. **End:** a short recap of decisions, open items, and what to remember. Nothing is ever committed by the agent.
 
 ## What it writes into your repo
 

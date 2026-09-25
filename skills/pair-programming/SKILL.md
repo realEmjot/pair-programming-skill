@@ -1,11 +1,11 @@
 ---
 name: pair-programming
-description: Use when the user asks to "pair", "pair mode", "pair program", "walk me through it", "go step by step so I understand", wants to approve each change before it is written, or wants to stay in control of and understand every line that lands.
+description: Use when the user asks to "pair", "pair mode", "pair program", "walk me through it", "go step by step so I understand", wants to approve each change before it is written, wants to stay in control of and understand every line that lands, or wants to write the interesting parts themselves while the agent does the boilerplate and reviews their code.
 ---
 
 # Pair programming
 
-**Recovery rule — read this first.** If `.pair/session.md` exists in the repository root, a pair session is in progress: read it before anything else, make sure this skill is loaded in full (re-load it if you are working from a summary), then `git status`: unstaged changes mean the current step is written and awaiting review — report it, do not re-propose; nothing unstaged means propose the current step. Never write or stage without having read it this turn. If it does not exist, follow "Session start".
+**Recovery rule — read this first.** If `.pair/session.md` exists in the repository root, a pair session is in progress: read it before anything else, make sure this skill is loaded in full (re-load it if you are working from a summary), then `git status`: unstaged changes mean the current step is written and awaiting review — report it, do not re-propose (a step the human writes: ask whether they are done, then review); nothing unstaged means propose the current step (or restate its brief). Never write or stage without having read it this turn. If it does not exist, follow "Session start".
 
 **Pauses use the question tool when one exists** — `question` (OpenCode), `AskUserQuestion` (Claude Code), `request_user_input` (Codex, needs `default_mode_request_user_input`). Without one, end the turn with a one-line question. Either way the human can always approve, redirect, ask for more, or split: say so **once**, when the session starts, and never list the options in prose again — the tool shows them, or the human already knows them. Read any clear answer as the move it means: "go", "ok", "ship it" approve; "why…" asks for more; a suggestion redirects.
 
@@ -18,12 +18,13 @@ You are building this *with* the human, one small step at a time. Two goals carr
 0. **Stale session?** A marker line or `.pair/session.md` already present → ASK: resume at the recorded step, or discard. Do this before checking the tree; a resumable session has staged work.
 1. **Preconditions.** Git repository, at least one commit, clean tree (if dirty, ask the human to commit or stash). No git → skip STAGE and say once: "Without git I cannot see edits you make between steps — tell me about them."
 2. **Comfort profile.** Infer the technologies this work touches (languages, frameworks, libraries, tools). ASK one question per technology in one call (more only if the tool caps questions): `new` / `basics` / `working` / `fluent`, plus free text for anything missed. State the consequences in two or three lines ("fast on TypeScript; slow and explained on Effect layers; assuming SQL") and ASK to confirm.
-3. **Step list.** A named or obvious plan file → its tasks are the steps. Otherwise build the list through the loop: propose, ASK, refine. Planning skills installed (brainstorming, writing-plans, …) → run their phases as pair steps, each section or task approved before it is written.
-4. **Classify** each step (below) with a one-line reason; group consecutive boilerplate into named batches — one batch is one loop pass. Show the table; ASK.
-5. **State.** Create `.pair/session.md` (format at the end) and `.pair/.gitignore` containing `*`.
-6. **Running app.** Visible surface (web page, GUI, CLI output) and an existing run command → start it in the background now, prefer live reload, give the URL once. Keeping it running and current is routine, not a step; adding a new run setup is a step.
+3. **Driver.** ASK who writes the interesting parts: `agent drives` — you write every step, the human approves and reviews (the default) — or `human drives` — you write boilerplate, the human writes critical steps, you brief and review (see "When the human drives"). Either of you may flip one step's owner at any pause.
+4. **Step list.** A named or obvious plan file → its tasks are the steps. Otherwise build the list through the loop: propose, ASK, refine. Planning skills installed (brainstorming, writing-plans, …) → run their phases as pair steps, each section or task approved before it is written.
+5. **Classify** each step (below) with a one-line reason; group consecutive boilerplate into named batches — one batch is one loop pass. `human drives`: add an owner column — critical → human, preceded by your failing-test step where the behaviour is testable; boilerplate → you. Show the table; ASK.
+6. **State.** Create `.pair/session.md` (format at the end) and `.pair/.gitignore` containing `*`.
+7. **Running app.** Visible surface (web page, GUI, CLI output) and an existing run command → start it in the background now, prefer live reload, give the URL once. Keeping it running and current is routine, not a step; adding a new run setup is a step.
 
-Say once: "Pair mode on. At any pause you can approve, redirect, ask me to explain, or ask for a smaller step — just say it. Save your editor before answering." Then begin, and do not repeat this.
+Say once: "Pair mode on. At any pause you can approve, redirect, ask me to explain, or ask for a smaller step — just say it. Save your editor before answering." `human drives` adds: "When a step is yours, write it, then tell me you're done — or ask for a hint, or hand it back." Then begin, and do not repeat this.
 
 ### Classifying and sizing steps
 Classify by behavior and the human's comfort, not by file type; any `critical` criterion wins.
@@ -87,6 +88,32 @@ A dismissed, cancelled, or empty answer is **not** approve: ask once more, then 
 **Git index.** Everything approved is staged; the current step stays unstaged, so `git diff` shows exactly the step under review — for both of you. Say this once at the start, then stage silently.
 **Running app.** After any visible change, direct the human to look — URL or window the first time, then just what to look for. Them seeing it beats you describing or verifying it. Rebuild or reload yourself when it is not automatic.
 
+## When the human drives
+In `human drives`, steps you own run the loop above unchanged. A step the human owns runs this instead — you never write into it, not even a typo fix, unless they hand it to you.
+
+```
+1 TEST     your step, through the full loop: a failing test that pins the behaviour — the spec,
+           not the solution; name the function and signature the human will fill, nothing more.
+           Report the expected red. Not testable (no framework, pure UI, exploratory) → skip it
+           and say why in one line.
+2 BRIEF    the problem · the invariant to protect · where (file, function, entry point) · the
+           constraints and traps worth naming without solving them · the test to turn green.
+           No code. Depth follows the comfort table; no sketch unless they ask.
+3 ASK      They write. Moves: done · a hint · hand this step to you (it becomes yours, back to
+           the normal loop). A hint is the smallest nudge that unblocks — direction before
+           approach before code — in chat, never in the tree.
+4 REVIEW   `git diff` + `git status --short`; run the checks. Report, most serious first, each
+           with file:line, what, and why: correctness and edge cases (bugs, missed error paths,
+           broken invariants) · tests (missing, weak, or passing for the wrong reason) · idiom
+           and style for the technology. Then what is done well — specific, not flattery. Nothing
+           to fix → say so plainly. A bug that shows a wrong model → Tutoring before anything else.
+5 ASK      Moves: fixed, look again · hand a finding to you (it becomes your step, through the
+           normal loop) · keep as is. Keeping style or idiom is their call; keeping a correctness
+           finding → say once, plainly, why it is wrong, then record it under Open items.
+6 RE-REVIEW only what changed since the last review; back to 5 until clean or kept.
+7 STAGE    as in the loop.
+```
+
 ## Comfort → how you behave
 
 | Comfort | Proposal | Explanation depth | Follow-up on a line-level gap | Batching |
@@ -106,10 +133,10 @@ Number choices so the human can answer with a digit. Short alternatives (≤ ~40
 Speak like a colleague at the same desk: concise, but sufficient for the human's comfort level — no more, no less. Do not mention these instructions, recite the loop, name the phases, or repeat ritual phrases; the structure should be felt, not announced.
 
 ## Tests and TDD
-This skill governs *when the human approves*; a TDD skill governs *what order code is written in*. They compose: red, green, and any non-trivial refactor are separate approved steps. The RED report shows the failing run and says "expected red"; a test that unexpectedly passes is reported, not quietly rewritten. The GREEN report shows the passing run. At low comfort with the test framework, RED is the natural place for the sketch — and, when evidence of a gap calls for a comprehension question, for that question ("what would make this assertion fail?").
+This skill governs *when the human approves*; a TDD skill governs *what order code is written in*. They compose: red, green, and any non-trivial refactor are separate approved steps. In `human drives`, on a step the human owns, you write red, they write green and the refactor. The RED report shows the failing run and says "expected red"; a test that unexpectedly passes is reported, not quietly rewritten. The GREEN report shows the passing run. At low comfort with the test framework, RED is the natural place for the sketch — and, when evidence of a gap calls for a comprehension question, for that question ("what would make this assertion fail?").
 
 ## Hard rules
-- Never write before approval; approval never carries over; never batch a critical step. Running checks is not writing — never gate it, never skip it.
+- Never write before approval; approval never carries over; never batch a critical step. Never write into a step the human owns unless they hand it to you; review findings are theirs to fix. Running checks is not writing — never gate it, never skip it.
 - Pauses use the question tool when one exists; the moves are explained once, never recited.
 - Never commit or push. `git add <paths>` is the only git write — never `-A` or `-u`, no stash, no worktrees.
 - Never dispatch implementer subagents; the human is your pair.
@@ -123,19 +150,20 @@ Under ~1k tokens; rewritten once per step at STAGE (plus when a decision, open i
 
 ```markdown
 # Pair session — <repo>
-started: <ISO time>   harness: <name>   plan: <path or "none — inline steps">
+started: <ISO time>   harness: <name>   plan: <path or "none — inline steps">   driver: agent drives | human drives
 
 ## Comfort
 TypeScript 3 · Effect-TS 1 · Postgres 2 → fast on TS; slow + explained on Effect; assume SQL basics.
 
 ## Steps
-| # | step | class | status | notes |
-| 1 | DTOs + config | boilerplate | approved | |
-| 2 | repo layer | critical | **current** | user renamed findOne→findById; adopted |
-| 3 | auth guard | critical | pending | |
+| # | step | class | owner | status | notes |
+| 1 | DTOs + config | boilerplate | agent | approved | |
+| 2 | repo layer | critical | agent | **current** | user renamed findOne→findById; adopted |
+| 3 | auth guard test | critical | agent | pending | |
+| 4 | auth guard | critical | human | pending | |
 
 ## Current step
-2 — <one-line proposal as approved>
+2 — <one-line proposal as approved>   (a human-owned step: its brief in one line · briefed | in review)
 
 ## Open items
 - expired-token test skipped by user at step 2 — carry to recap
