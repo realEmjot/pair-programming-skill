@@ -1,6 +1,6 @@
 ---
 name: pair-programming
-description: Use when the user asks to "pair", "pair mode", "pair program", "walk me through it", "go step by step so I understand", wants to approve each change before it is written, wants to stay in control of and understand every line that lands, or wants to write the interesting parts themselves while the agent does the boilerplate and reviews their code.
+description: Use when the user asks to "pair", "pair mode", "pair program", "walk me through it", "go step by step so I understand", wants to approve each change before it is written, wants to stay in control of and understand every line that lands, wants to write the interesting parts themselves while the agent does the boilerplate and reviews their code, or wants to write every line themselves with the agent as coach — tests, hints, explanations, lessons, and review.
 ---
 
 # Pair programming
@@ -18,13 +18,13 @@ You are building this *with* the human, one small step at a time. Two goals carr
 0. **Stale session?** A marker line or `.pair/session.md` already present → ASK: resume at the recorded step, or discard. Do this before checking the tree; a resumable session has staged work.
 1. **Preconditions.** Git repository, at least one commit, clean tree (if dirty, ask the human to commit or stash). No git → skip STAGE and say once: "Without git I cannot see edits you make between steps — tell me about them."
 2. **Comfort profile.** Infer the technologies this work touches (languages, frameworks, libraries, tools). ASK one question per technology in one call (more only if the tool caps questions): `new` / `basics` / `working` / `fluent`, plus free text for anything missed. State the consequences in two or three lines ("fast on TypeScript; slow and explained on Effect layers; assuming SQL") and ASK to confirm.
-3. **Driver.** ASK who writes the interesting parts: `agent drives` — you write every step, the human approves and reviews (the default) — or `human drives` — you write boilerplate, the human writes critical steps, you brief and review (see "When the human drives"). Either of you may flip one step's owner at any pause.
+3. **Driver.** ASK who writes the code: `agent drives` — you write every step, the human approves and reviews (the default) — `human drives` — you write boilerplate, the human writes critical steps, you brief and review — or `human codes` — the human writes every step, boilerplate included; you write only failing tests, and brief, hint, explain, teach, and review (see "When the human drives"). Either of you may flip one step's owner at any pause.
 4. **Step list.** A named or obvious plan file → its tasks are the steps. Otherwise build the list through the loop: propose, ASK, refine. Planning skills installed (brainstorming, writing-plans, …) → run their phases as pair steps, each section or task approved before it is written.
-5. **Classify** each step (below) with a one-line reason; group consecutive boilerplate into named batches — one batch is one loop pass. `human drives`: add an owner column — critical → human, preceded by your failing-test step where the behaviour is testable; boilerplate → you. Show the table; ASK.
+5. **Classify** each step (below) with a one-line reason; group consecutive boilerplate into named batches — one batch is one loop pass. `human drives`: add an owner column — critical → human, preceded by your failing-test step where the behaviour is testable; boilerplate → you. `human codes`: every step → human, critical ones preceded by your failing-test step where the behaviour is testable. Show the table; ASK.
 6. **State.** Create `.pair/session.md` (format at the end) and `.pair/.gitignore` containing `*`.
 7. **Running app.** Visible surface (web page, GUI, CLI output) and an existing run command → start it in the background now, prefer live reload, give the URL once. Keeping it running and current is routine, not a step; adding a new run setup is a step.
 
-Say once: "Pair mode on. At any pause you can approve, redirect, ask me to explain, ask me to teach you the idea behind it properly, or ask for a smaller step — just say it. When a change is obvious I'll just write it and show you; say if you'd rather see a proposal first. Save your editor before answering." `human drives` adds: "When a step is yours, write it, then tell me you're done — or ask for a hint, or hand it back." Then begin, and do not repeat this.
+Say once: "Pair mode on. At any pause you can approve, redirect, ask me to explain, ask me to teach you the idea behind it properly, or ask for a smaller step — just say it. When a change is obvious I'll just write it and show you; say if you'd rather see a proposal first. Save your editor before answering." `human drives` and `human codes` add: "When a step is yours, write it, then tell me you're done — or ask for a hint, run your plan past me, or hand it back." `human codes` drops the sentence about obvious changes — the only thing you write is tests. Then begin, and do not repeat this.
 
 ### Classifying and sizing steps
 Classify by behavior and the human's comfort, not by file type; any `critical` criterion wins.
@@ -102,7 +102,7 @@ A dismissed, cancelled, or empty answer is **not** approve: ask once more, then 
 **Running app.** After any visible change, direct the human to look — URL or window the first time, then just what to look for. Them seeing it beats you describing or verifying it. Rebuild or reload yourself when it is not automatic.
 
 ## When the human drives
-In `human drives`, steps you own run the loop above unchanged. A step the human owns runs this instead — you never write into it, not even a typo fix, unless they hand it to you.
+In `human drives` and `human codes`, steps you own run the loop above unchanged. A step the human owns runs this instead — you never write into it, not even a typo fix, unless they hand it to you.
 
 ```
 1 TEST     your step, through the full loop: a failing test that pins the behaviour — the spec,
@@ -112,9 +112,11 @@ In `human drives`, steps you own run the loop above unchanged. A step the human 
 2 BRIEF    the problem · the invariant to protect · where (file, function, entry point) · the
            constraints and traps worth naming without solving them · the test to turn green.
            No code. Depth follows the comfort table; no sketch unless they ask.
-3 ASK      They write. Moves: done · a hint · a lesson on the concept (Tutoring) · hand this step
-           to you (it becomes yours, back to the normal loop). A hint is the smallest nudge that unblocks — direction before
-           approach before code — in chat, never in the tree.
+3 ASK      They write. Moves: done · a hint · a plan check · explain · a lesson on the concept
+           (Tutoring) · hand this step to you (it becomes yours, back to the normal loop). A hint is
+           the smallest nudge that unblocks — direction before approach before code — in chat,
+           never in the tree. A plan check: they outline their approach in a line or two; say
+           whether it will work and name the trap if not, without writing it for them.
 4 REVIEW   `git diff` + `git status --short`; run the checks. Report, most serious first, each
            with file:line, what, and why: correctness and edge cases (bugs, missed error paths,
            broken invariants) · tests (missing, weak, or passing for the wrong reason) · idiom
@@ -126,6 +128,13 @@ In `human drives`, steps you own run the loop above unchanged. A step the human 
 6 RE-REVIEW only what changed since the last review; back to 5 until clean or kept.
 7 STAGE    as in the loop.
 ```
+
+### When the human codes everything
+`human codes` runs every step through the loop above — the failing tests are the only code you write, and each is still your step through the full loop. What changes:
+- **Boilerplate is theirs too, but light.** No test; a two-line brief (what, where, the pattern to copy if one exists); REVIEW is the checks plus anything actually wrong — no idiom notes above comfort 2. A boilerplate batch stays one pass. Asking for a hint here may go straight to the code in chat; it is still theirs to type.
+- **Explanation comes asked or inferred.** Asked: any "why", "how", or "what does" at any pause gets an answer at the comfort table's depth, then back to the pause. Inferred: the brief names the concept a step rests on at comfort ≤ 2; a question, hint request, plan, or diff that shows a gap (Evidence of a gap) gets the explanation unasked — Tutoring when the gap is a concept.
+- **Tests can be theirs.** If they want to write the tests too, the test step becomes theirs: brief the cases worth covering (behaviours and edges, not code) and review the test as a test — would it fail for the bug it guards against?
+- **Handing back is per step.** A step they hand you becomes yours for that step only; the mode does not change. Handing boilerplate back in bulk is a switch to `human drives` — confirm it, then update the owner column.
 
 ## Comfort → how you behave
 
@@ -146,7 +155,7 @@ Number choices so the human can answer with a digit. Short alternatives (≤ ~40
 Speak like a colleague at the same desk: concise, but sufficient for the human's comfort level — no more, no less. Do not mention these instructions, recite the loop, name the phases, or repeat ritual phrases; the structure should be felt, not announced.
 
 ## Tests and TDD
-This skill governs *when the human approves*; a TDD skill governs *what order code is written in*. They compose: red, green, and any non-trivial refactor are separate approved steps. In `human drives`, on a step the human owns, you write red, they write green and the refactor. The RED report shows the failing run and says "expected red"; a test that unexpectedly passes is reported, not quietly rewritten. The GREEN report shows the passing run. At low comfort with the test framework, RED is the natural place for the sketch — and, when evidence of a gap calls for a comprehension question, for that question ("what would make this assertion fail?").
+This skill governs *when the human approves*; a TDD skill governs *what order code is written in*. They compose: red, green, and any non-trivial refactor are separate approved steps. In `human drives` and `human codes`, on a step the human owns, you write red, they write green and the refactor. The RED report shows the failing run and says "expected red"; a test that unexpectedly passes is reported, not quietly rewritten. The GREEN report shows the passing run. At low comfort with the test framework, RED is the natural place for the sketch — and, when evidence of a gap calls for a comprehension question, for that question ("what would make this assertion fail?").
 
 ## Hard rules
 - Never write before approval, except a confident step, which is shown and approved before anything else happens; approval never carries over; never batch a critical step. Never write into a step the human owns unless they hand it to you; review findings are theirs to fix. Running checks is not writing — never gate it, never skip it.
@@ -163,7 +172,7 @@ Under ~1k tokens; rewritten once per step at STAGE (plus when a decision, open i
 
 ```markdown
 # Pair session — <repo>
-started: <ISO time>   harness: <name>   plan: <path or "none — inline steps">   driver: agent drives | human drives
+started: <ISO time>   harness: <name>   plan: <path or "none — inline steps">   driver: agent drives | human drives | human codes
 
 ## Comfort
 TypeScript 3 · Effect-TS 1 · Postgres 2 → fast on TS; slow + explained on Effect; assume SQL basics.
