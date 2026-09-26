@@ -24,7 +24,7 @@ You are building this *with* the human, one small step at a time. Two goals carr
 6. **State.** Create `.pair/session.md` (format at the end) and `.pair/.gitignore` containing `*`.
 7. **Running app.** Visible surface (web page, GUI, CLI output) and an existing run command → start it in the background now, prefer live reload, give the URL once. Keeping it running and current is routine, not a step; adding a new run setup is a step.
 
-Say once: "Pair mode on. At any pause you can approve, redirect, ask me to explain, or ask for a smaller step — just say it. When a change is obvious I'll just write it and show you; say if you'd rather see a proposal first. Save your editor before answering." `human drives` adds: "When a step is yours, write it, then tell me you're done — or ask for a hint, or hand it back." Then begin, and do not repeat this.
+Say once: "Pair mode on. At any pause you can approve, redirect, ask me to explain, ask me to teach you the idea behind it properly, or ask for a smaller step — just say it. When a change is obvious I'll just write it and show you; say if you'd rather see a proposal first. Save your editor before answering." `human drives` adds: "When a step is yours, write it, then tell me you're done — or ask for a hint, or hand it back." Then begin, and do not repeat this.
 
 ### Classifying and sizing steps
 Classify by behavior and the human's comfort, not by file type; any `critical` criterion wins.
@@ -72,7 +72,13 @@ When there is one obvious way to do the step — no real alternatives, no design
 A comprehension question is a response to something the human did, never a ritual. Ask one when, in this step or the previous one, the human: asked why/how/what something does or chose "Explain better"; answered a question wrongly or vaguely; edited the diff in a way that introduced a bug or contradicted the agreed design; said they were unsure ("I think", "I guess", "not sure I follow"). Aim the question at that gap. A history of clean approvals, a critical classification, or a low comfort rating is not evidence — explain at the comfort table's depth and ask for approval only.
 
 ### Tutoring
-When the gap is a *concept* rather than a line — a model of how something works that this step or a coming one rests on (what a closure captures, what an index guarantees, what a promise's `then` returns) — become a tutor, unasked. At every comfort rating: a rating the evidence contradicts was wrong for this concept. Under time pressure too: the coming steps rest on the concept, so teaching it now is the short way there. Tutoring is, in order: which part of their model is wrong, plainly · the correct model built from what they already know, in their terms · where it shows in this code and which coming step rests on it · one open question about behaviour that only the correct model answers. Then wait. Move on when the answer shows the model has landed, or when the human declines the lesson after hearing it — "whatever, go ahead" said before it is an approve of the step, not a decline.
+Tutoring is a lesson on the *concept* under a step — a model of how something works (what a closure captures, what an index guarantees, what a promise's `then` returns) — not a longer explanation of its lines. Explain better stays on this step's proposal or code: one level deeper, one reply, a colleague's register. Tutoring leaves the lines for the idea beneath them: longer, over several turns, a teacher's register, starting from what the human already knows and checking as it goes.
+
+It starts two ways. The human asks — the Tutor move, at any pause. Or the gap is a concept that this step or a coming one rests on — then become a tutor, unasked. At every comfort rating: a rating the evidence contradicts was wrong for this concept. Under time pressure too: the coming steps rest on the concept, so teaching it now is the short way there.
+
+**Find the floor first** — the deepest layer of the topic the human solidly holds; the lesson builds up from there, never from a guess. Start from the evidence (the comfort rating, their question or wrong answer, a floor recorded earlier in the session), then ask one or two short diagnostic questions about the concept's prerequisites, nearest first: a confident, correct answer → the floor is there, start just above it; wrong or unsure → one layer down, ask again. Stop at the first solid answer. Say in a few words that this is to find where to start, not a test; keep each answerable in a line (the question tool's options work well: "Which is closest to what `await` does?"). Evidence that already pins the floor → skip the diagnostics. "Just explain it" → start at the comfort rating's floor and say where you are starting. Record the floor in `.pair/session.md` so the topic is never re-probed.
+
+**Then teach up from it**, one idea per turn, each short enough to read in one go: (unasked: which part of their model is wrong, plainly, first) · the idea in plain words, built from the floor, in their terms — analogies from technologies they rated higher · a minimal example, standalone in chat when this codebase would obscure it, never in the tree · where it shows in this code and which coming step rests on it · one open question about behaviour that only the correct model answers. Then wait; a wrong answer → a layer down or a different angle, not the same words louder. Finish when the answer shows the model has landed, then return to the pause the lesson started from — the step is still awaiting approval. Or finish when the human declines the lesson after hearing it — "whatever, go ahead" said before it is an approve of the step, not a decline.
 
 ### The question tool
 One call may carry several questions, up to the tool's limit. The standard moves, in this order, plus the tool's free-text answer:
@@ -82,11 +88,14 @@ One call may carry several questions, up to the tool's limit. The standard moves
 | **Approve / Continue** | write it | stage it, next step |
 | **Reject / propose alternative** | offer a different approach (or take theirs from free text); re-PROPOSE | offer `git restore` of this step's files (and deleting new ones); re-PROPOSE the rework — write nothing until approved |
 | **Explain better** | one level deeper on the proposal; ask again | one level deeper on the code; ask again |
+| **Tutor me** | teach the concept the proposal rests on (Tutoring); ask again | teach the concept the code rests on (Tutoring); ask again |
 | **Split** | re-PROPOSE the first sub-step | stage nothing; re-PROPOSE the rest as smaller steps |
+
+Offer Tutor when the step rests on a concept worth a lesson — new to the human, at comfort ≤ 2, or one they stumbled on; drop it for plain boilerplate. When the tool caps options below the moves that apply (Claude Code: four), drop the least useful here — usually Split on an already-small step; free text still reaches every move.
 
 A dismissed, cancelled, or empty answer is **not** approve: ask once more, then wait. A bare approve on a critical step whose comprehension question went unanswered → ask it once more before staging.
 
-**Wording is yours; the moves are not.** Phrase each option for the actual step — "Add the guard as proposed" / "Different approach" / "Why the early return?" / "Just the type first" — so the human reads a choice, not a ritual. Approve is always first; drop a move when it is meaningless here. In prose fallback the pause is the question itself ("Add the guard like this?") — never a numbered menu of the moves. When the decision *is* a choice among concrete alternatives — numbered approaches, a library, resume or discard, comfort 1–4 — the options are those alternatives with one-line trade-offs, your lean first, plus a way to ask for more. Do not dress approve-or-not up as a menu or pad with "Yes / Sure / Looks good" variants.
+**Wording is yours; the moves are not.** Phrase each option for the actual step — "Add the guard as proposed" / "Different approach" / "Why the early return?" / "Teach me how narrowing works" / "Just the type first" — so the human reads a choice, not a ritual. Approve is always first; drop a move when it is meaningless here. In prose fallback the pause is the question itself ("Add the guard like this?") — never a numbered menu of the moves. When the decision *is* a choice among concrete alternatives — numbered approaches, a library, resume or discard, comfort 1–4 — the options are those alternatives with one-line trade-offs, your lean first, plus a way to ask for more. Do not dress approve-or-not up as a menu or pad with "Yes / Sure / Looks good" variants.
 
 ### Two shared screens
 **Git index.** Everything approved is staged; the current step stays unstaged, so `git diff` shows exactly the step under review — for both of you. Say this once at the start, then stage silently.
@@ -103,8 +112,8 @@ In `human drives`, steps you own run the loop above unchanged. A step the human 
 2 BRIEF    the problem · the invariant to protect · where (file, function, entry point) · the
            constraints and traps worth naming without solving them · the test to turn green.
            No code. Depth follows the comfort table; no sketch unless they ask.
-3 ASK      They write. Moves: done · a hint · hand this step to you (it becomes yours, back to
-           the normal loop). A hint is the smallest nudge that unblocks — direction before
+3 ASK      They write. Moves: done · a hint · a lesson on the concept (Tutoring) · hand this step
+           to you (it becomes yours, back to the normal loop). A hint is the smallest nudge that unblocks — direction before
            approach before code — in chat, never in the tree.
 4 REVIEW   `git diff` + `git status --short`; run the checks. Report, most serious first, each
            with file:line, what, and why: correctness and edge cases (bugs, missed error paths,
@@ -150,7 +159,7 @@ This skill governs *when the human approves*; a TDD skill governs *what order co
 - **At the end, or when the human says stop:** remove the marker line, delete `.pair/`, give a short recap (decisions, open items, the two or three things worth remembering), then hand off to a finishing skill if installed or offer to commit.
 
 ## `.pair/session.md`
-Under ~1k tokens; rewritten once per step at STAGE (plus when a decision, open item, or comfort change lands) in a single write — never incremental edits, they flood the human's transcript. No code, diffs, or rules — only what you would need after losing your memory; the step's live state is the unstaged diff.
+Under ~1k tokens; rewritten once per step at STAGE (plus when a decision, open item, comfort change, or knowledge floor lands) in a single write — never incremental edits, they flood the human's transcript. No code, diffs, or rules — only what you would need after losing your memory; the step's live state is the unstaged diff.
 
 ```markdown
 # Pair session — <repo>
@@ -158,6 +167,7 @@ started: <ISO time>   harness: <name>   plan: <path or "none — inline steps"> 
 
 ## Comfort
 TypeScript 3 · Effect-TS 1 · Postgres 2 → fast on TS; slow + explained on Effect; assume SQL basics.
+Floors: Effect layers — holds DI via constructor args, not type-level requirements (step 2).
 
 ## Steps
 | # | step | class | owner | status | notes |
